@@ -15,10 +15,20 @@ typedef struct adyacente {
 
 typedef struct vertice {
 	int vertice;				//Numero del vertice 
-	struct Nodos* adyacente;	//Puntero a los nodos adyacentes
+	struct adyacente* adyacente;	//Puntero a los nodos adyacentes
 	struct vertice* sigVertice;	//Puntero al siguiente vertice
 	struct vertice* cabecera;	//Puntero al primer vertice
 } Grafo;
+
+
+
+Nodos* agregarAdyacentes(Nodos* adyacentesInicial, int ultimaPos, int verticeNumero, int cantVertices, char linea[1000]);
+Nodos* crearAdyacentes(Grafo* grafoInicial, char linea[1000], int cantVertices);
+int obtenerNumero(int numeroPalabra, char linea[1000]);
+Grafo* agregarVertice(Grafo* grafoInicial, int numeroGrafo, char linea[1000], int cantVertices);
+Grafo* leerGrafo(char* nombreArchivo, int* nVertices, int* vSalida, int* vLlegada);
+
+
 
 Nodos* agregarAdyacentes(Nodos* adyacentesInicial, int ultimaPos, int verticeNumero, int cantVertices, char linea[1000])
 {
@@ -27,6 +37,7 @@ Nodos* agregarAdyacentes(Nodos* adyacentesInicial, int ultimaPos, int verticeNum
 	Nodos* nuevo = NULL;								//Creo el nuevo nodo
 	int saltoE = verticeNumero;							//Iterador de espacios
 	int aux = ultimaPos;								//Iterador auxiliar
+	int numeroObtenido;
 
 	while (saltoE != cantVertices)				//Se agregan adyacentes hasta que me encuentre en el ultimo vertice
 	{
@@ -47,7 +58,8 @@ Nodos* agregarAdyacentes(Nodos* adyacentesInicial, int ultimaPos, int verticeNum
 		if (linea[aux] != '\n')								//Si el elemento no es 0 creo inicio la lista de vertices adyacentes
 		{
 			nuevo = (Nodos*)malloc(sizeof(Nodos));
-			nuevo->peso = obtenerNumero(saltoE, linea);
+			numeroObtenido = obtenerNumero(saltoE, linea);
+			nuevo->peso = numeroObtenido;
 			nuevo->vertice = saltoE;
 			nuevo->verticeO = final->verticeO;
 			nuevo->siguiente = NULL;
@@ -65,6 +77,7 @@ Nodos* crearAdyacentes(Grafo* grafoInicial, char linea[1000], int cantVertices)
 
 	int saltoE = 1;										//Iterador de espacios
 	int aux = 0;										//Iterador auxiliar
+	int numeroObtenido;									
 
 	while (1)											//Se busca el primer nodo adyacente
 	{
@@ -78,7 +91,8 @@ Nodos* crearAdyacentes(Grafo* grafoInicial, char linea[1000], int cantVertices)
 	if (linea[aux] != '0')								//Si el elemento no es 0 creo inicio la lista de vertices adyacentes
 	{
 		adyacentes = (Nodos*)malloc(sizeof(Nodos));
-		adyacentes->peso = obtenerNumero(saltoE, linea);
+		numeroObtenido = obtenerNumero(saltoE, linea);
+		adyacentes->peso = numeroObtenido;
 		adyacentes->vertice = saltoE;
 		adyacentes->verticeO = grafoInicial;
 		adyacentes->siguiente = NULL;
@@ -95,7 +109,8 @@ int obtenerNumero(int numeroPalabra, char linea[1000])
 	int aux = 0;								//Iterador auxiliar
 	int largo = strlen(linea) - 1;					//Largo de la linea leida
 	char numeroString[100];						//Arreglo que contendra el numero buscado
-	
+	int numeroObtenido;
+
 	while (saltoE != numeroPalabra)							//Posiciono iterador en el numero que quiero leer
 	{
 		if (iterador == largo) break;
@@ -117,20 +132,10 @@ int obtenerNumero(int numeroPalabra, char linea[1000])
 		iterador++;
 	}
 
-	return atoi(numeroString);								//Devuelvo el numero como entero
-}
+	numeroObtenido = atoi(numeroString);
 
-//int peso;							//Peso de la arista
-//int vertice;						//Numero del vertice adyacente
-//struct adyacente* siguiente;		//Puntero al siguiente vertice adyacente
-//struct vertice* vertice;			//Puntero al vertice inicial
-//} Nodos;
-//
-//typedef struct vertice {
-//	int vertice;				//Numero del vertice 
-//	struct Nodos* adyacente;	//Puntero a los nodos adyacentes
-//	struct vertice* sigVertice;	//Puntero al siguiente vertice
-//	struct vertice* cabecera;	//Puntero al primer vertice
+	return numeroObtenido;								//Devuelvo el numero como entero
+}
 
 Grafo* agregarVertice(Grafo* grafoInicial, int numeroGrafo, char linea[1000], int cantVertices)
 {
@@ -145,14 +150,13 @@ Grafo* agregarVertice(Grafo* grafoInicial, int numeroGrafo, char linea[1000], in
 
 	nuevo = (Grafo*)malloc(sizeof(Grafo));			//Agrego nuevo Vertice
 	nuevo->vertice = numeroGrafo;
-	nuevo->adyacente = crearAdyacentes(nuevo, linea, cantVertices);;
+	nuevo->adyacente = crearAdyacentes(nuevo, linea, cantVertices);
 	nuevo->cabecera = final->cabecera;
 	nuevo->sigVertice = NULL;
 	final->sigVertice = nuevo;
 
 	return grafo;
 }
-
 
 Grafo* leerGrafo(char* nombreArchivo, int* nVertices, int* vSalida, int* vLlegada)
 {
@@ -225,6 +229,14 @@ void main()
 	else
 		printf("Archivo leido con exito.\n");
 	
+
+
+
+
+
+
+
+
 
 }
 
