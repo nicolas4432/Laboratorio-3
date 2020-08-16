@@ -251,42 +251,44 @@ Resultados* recoridoProfundidad(Grafo* grafo, int numeroVertices,int verInicial,
 	Nodos* puntAdyacentes = NULL;								//Puntero de la lista de vertices adyacentes
 	Grafo* puntVertices = grafo;									//Puntero de la lista de vertices
 
-	
-	for (int i = 0; i < numeroVertices; i++)					//Arreglo de "booleanos" para vertices recorridos
+	if (true)
 	{
-		marcados[i] = 0;
-	}
-
-	pila = push_pila(pila, verInicial);								//Agrego el vertice inicial
-
-	while (pila != NULL)										//Hasta que la pila este vacia
-	{
-		verAct = pila->vertice;							//Vertice actual
-		
-		if (verAct == verFinal) {						//Si el vertice actual es el final
-			recorrido = push_pila(recorrido, verAct);	//Se agrega vertice y termina de crecorrer nodos
-			break;
+		for (int i = 0; i < numeroVertices; i++)					//Arreglo de "booleanos" para vertices recorridos
+		{
+			marcados[i] = 0;
 		}
-		pila = pop(pila);								//Se saca el ultimo verte
 
-		if (marcados[verAct - 1] == 0) {					//Si el vertice no a sido recorrido 
-			marcados[verAct - 1] = 1;						//Se marca el vertice recorrido
-			recorrido = push_pila(recorrido, verAct);		//Se agrega el vertice recorrido a la lista de recorridos
+		pila = push_pila(pila, verInicial);								//Agrego el vertice inicial
 
-			for (int i = 1; i < verAct; i++)						//Posiciono el puntero en el vertice actual
-			{
-				puntVertices = puntVertices->sigVertice;
+		while (pila != NULL)										//Hasta que la pila este vacia
+		{
+			verAct = pila->vertice;							//Vertice actual
+
+			if (verAct == verFinal) {						//Si el vertice actual es el final
+				recorrido = push_pila(recorrido, verAct);	//Se agrega vertice y termina de crecorrer nodos
+				break;
 			}
+			pila = pop(pila);								//Se saca el ultimo verte
 
-			puntAdyacentes = puntVertices->adyacente;					//Posiciono puntero en la lista de adyacentes
+			if (marcados[verAct - 1] == 0) {					//Si el vertice no a sido recorrido 
+				marcados[verAct - 1] = 1;						//Se marca el vertice recorrido
+				recorrido = push_pila(recorrido, verAct);		//Se agrega el vertice recorrido a la lista de recorridos
 
-			while (puntAdyacentes != NULL)								//Agrego todos los vertices adyacentes a la pila
-			{
-				pila = push_pila(pila, puntAdyacentes->vertice);
-				puntAdyacentes = puntAdyacentes->siguiente;
+				for (int i = 1; i < verAct; i++)						//Posiciono el puntero en el vertice actual
+				{
+					puntVertices = puntVertices->sigVertice;
+				}
+
+				puntAdyacentes = puntVertices->adyacente;					//Posiciono puntero en la lista de adyacentes
+
+				while (puntAdyacentes != NULL)								//Agrego todos los vertices adyacentes a la pila
+				{
+					pila = push_pila(pila, puntAdyacentes->vertice);
+					puntAdyacentes = puntAdyacentes->siguiente;
+				}
+
+				puntVertices = puntVertices->cabecera;					//Posiciono el puntero de vertices en el incio de la lista
 			}
-
-			puntVertices = puntVertices->cabecera;					//Posiciono el puntero de vertices en el incio de la lista
 		}
 	}
 
@@ -322,6 +324,17 @@ void main()
 	else
 		printf("Archivo leido con exito.\n");
 	
+
+
+
+
+
+
+
+
+
+
+
 
 
 	recoridoProfundidad(grafo, numeroVertices, verticeSalida, verticeLlegada);
