@@ -37,7 +37,7 @@ typedef struct listaRecorridos {
 /*------------------Declaracion de funciones----------------------*/
 Pila* pop(Pila* lista);
 Pila* push_pila(Pila* lista, int vertice);
-void push_resultado(Resultados* lista, Pila* pila);
+Resultados* push_resultado(Resultados* lista, Pila* pila);
 Nodos* agregarAdyacentes(Nodos* adyacentesInicial, int ultimaPos, int verticeNumero, int cantVertices, char linea[1000]);
 Nodos* crearAdyacentes(Grafo* grafoInicial, char linea[1000], int cantVertices);
 int obtenerNumero(int numeroPalabra, char linea[1000]);
@@ -62,10 +62,11 @@ Pila* push_pila(Pila* lista, int vertice) {
 	return nodo;
 }
 
-void push_resultado(Resultados* lista, Pila* pila) {
+Resultados* push_resultado(Resultados* lista, Pila* pila) {
 	Resultados* nodo = (Resultados*)malloc(sizeof(Resultados));
 	nodo->recorrido = pila;
 	nodo->siguiente = lista;
+	return nodo;
 }
 
 Nodos* agregarAdyacentes(Nodos* adyacentesInicial, int ultimaPos, int verticeNumero, int cantVertices, char linea[1000])
@@ -242,59 +243,56 @@ Grafo* leerGrafo(char* nombreArchivo, int* nVertices, int* vSalida, int* vLlegad
 	return grafo;
 }
 
-Resultados* recoridoProfundidad(Grafo* grafo, int numeroVertices,int verInicial, int verFinal) {
-	Pila* recorrido = NULL;										//Creo la lista que tendra el recorrido
-	Pila* pila = NULL;											//Creo una pila
-	Resultados* resutaldo = NULL;								//Creo la lista que guardara los recorridos
-	int* marcados = (int*)malloc(numeroVertices * sizeof(int));	//Creo un arreglo de igual tamaño que la cantidad de vertices
+Resultados* recoridoProfundidad(Grafo* grafo, int verFinal, Pila* pilaActual, Pila* pilaRecorrido, int* verticesMarcados, Resultados* listaResultados) 
+{
 	int verAct;													//Vertice actual
 	Nodos* puntAdyacentes = NULL;								//Puntero de la lista de vertices adyacentes
 	Grafo* puntVertices = grafo;									//Puntero de la lista de vertices
+	Pila* pilaAux = (Pila*)malloc(sizeof(Pila));
 
-	if (true)
+	while (pilaActual != NULL)										//Hasta que la pila este vacia
 	{
-		for (int i = 0; i < numeroVertices; i++)					//Arreglo de "booleanos" para vertices recorridos
-		{
-			marcados[i] = 0;
+		verAct = pilaActual->vertice;							//Vertice actual
+
+		if (verAct == verFinal) {						//Si el vertice actual es el final
+			pilaRecorrido = push_pila(pilaRecorrido, verAct);	//Se agrega vertice y termina de crecorrer nodos
+			listaResultados = push_resultado(listaResultados, pilaRecorrido);
+			free(pilaAux);
+			return listaResultados;
 		}
+		
+		pilaActual = pop(pilaActual);								//Se saca el ultimo verte
 
-		pila = push_pila(pila, verInicial);								//Agrego el vertice inicial
+		if (verticesMarcados[verAct - 1] == 0) {					//Si el vertice no a sido recorrido 
+			verticesMarcados[verAct - 1] = 1;						//Se marca el vertice recorrido
+			pilaRecorrido = push_pila(pilaRecorrido, verAct);		//Se agrega el vertice recorrido a la lista de recorridos
 
-		while (pila != NULL)										//Hasta que la pila este vacia
-		{
-			verAct = pila->vertice;							//Vertice actual
-
-			if (verAct == verFinal) {						//Si el vertice actual es el final
-				recorrido = push_pila(recorrido, verAct);	//Se agrega vertice y termina de crecorrer nodos
-				break;
+			for (int i = 1; i < verAct; i++)						//Posiciono el puntero en el vertice actual
+			{
+				puntVertices = puntVertices->sigVertice;
 			}
-			pila = pop(pila);								//Se saca el ultimo verte
 
-			if (marcados[verAct - 1] == 0) {					//Si el vertice no a sido recorrido 
-				marcados[verAct - 1] = 1;						//Se marca el vertice recorrido
-				recorrido = push_pila(recorrido, verAct);		//Se agrega el vertice recorrido a la lista de recorridos
+			puntAdyacentes = puntVertices->adyacente;					//Posiciono puntero en la lista de adyacentes
 
-				for (int i = 1; i < verAct; i++)						//Posiciono el puntero en el vertice actual
-				{
-					puntVertices = puntVertices->sigVertice;
-				}
-
-				puntAdyacentes = puntVertices->adyacente;					//Posiciono puntero en la lista de adyacentes
-
-				while (puntAdyacentes != NULL)								//Agrego todos los vertices adyacentes a la pila
-				{
-					pila = push_pila(pila, puntAdyacentes->vertice);
-					puntAdyacentes = puntAdyacentes->siguiente;
-				}
-
-				puntVertices = puntVertices->cabecera;					//Posiciono el puntero de vertices en el incio de la lista
+			while (puntAdyacentes != NULL)								//Agrego todos los vertices adyacentes a la pila
+			{
+				pilaActual = push_pila(pilaActual, puntAdyacentes->vertice);
+				
+				pilaAux->vertice = pilaActual->vertice;
+				pilaAux->siguiente = NULL;
+				
+				puntAdyacentes = puntAdyacentes->siguiente;
+				listaResultados = recoridoProfundidad(grafo, verFinal, pilaAux, pilaRecorrido, verticesMarcados, listaResultados);
+				pilaAux = (Pila*)malloc(sizeof(Pila));
+				pilaActual = pop(pilaActual);
 			}
+
+			puntVertices = puntVertices->cabecera;					//Posiciono el puntero de vertices en el incio de la lista
+			
 		}
 	}
-
-
-
-
+	free(pilaAux);
+	return listaResultados;
 }
 
 
@@ -325,19 +323,23 @@ void main()
 		printf("Archivo leido con exito.\n");
 	
 
+	Pila* recorrido = NULL;										//Creo la lista que tendra el recorrido
+	Pila* pila = NULL;											//Creo una pila
+	Resultados* resultado = NULL;								//Creo la lista que guardara los recorridos
+	int* marcados = (int*)malloc(numeroVertices * sizeof(int));	//Creo un arreglo de igual tamaño que la cantidad de vertices
+	//Pila* pilaAux = (Pila*)malloc(sizeof(Pila));
+
+	for (int i = 0; i < numeroVertices; i++)					//Arreglo de "booleanos" para vertices recorridos
+	{
+		marcados[i] = 0;
+	}
+
+	pila = push_pila(pila, verticeSalida);								//Agrego el vertice inicial
+
+	resultado = recoridoProfundidad(grafo, verticeLlegada, pila, recorrido, marcados, resultado);
+	
 
 
-
-
-
-
-
-
-
-
-
-
-	recoridoProfundidad(grafo, numeroVertices, verticeSalida, verticeLlegada);
 
 
 }
@@ -359,4 +361,23 @@ void main()
 //	printf("\n");
 //	puntero = puntero->sigVertice;
 //	if (puntero != NULL) punteroN = puntero->adyacente;
+//}
+
+
+//IMPRIMIR RESULTADOS
+//Resultados* puntero = resultado;					//Asigno puntero para posicion final
+//Pila* erecorrido = puntero->recorrido;
+//while (puntero != NULL)				//Posiciono puntero al final de la lista
+//{
+//	printf("El recorrido es: ");
+//	printf("%d ", erecorrido->vertice);
+//	erecorrido = erecorrido->siguiente;
+//	while (erecorrido != NULL)				//Posiciono puntero al final de la lista
+//	{
+//		printf("- %d ", erecorrido->vertice);
+//		erecorrido = erecorrido->siguiente;
+//	}
+//	printf("\n");
+//	puntero = puntero->siguiente;
+//	if (puntero != NULL) erecorrido = puntero->recorrido;
 //}
