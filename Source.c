@@ -31,9 +31,6 @@ typedef struct listaRecorridos {
 } Resultados;
 
 
-
-
-
 /*------------------Declaracion de funciones----------------------*/
 Pila* pop(Pila* lista);
 Pila* push_pila(Pila* lista, int vertice);
@@ -43,7 +40,10 @@ Nodos* crearAdyacentes(Grafo* grafoInicial, char linea[1000], int cantVertices);
 int obtenerNumero(int numeroPalabra, char linea[1000]);
 Grafo* agregarVertice(Grafo* grafoInicial, int numeroGrafo, char linea[1000], int cantVertices);
 Grafo* leerGrafo(char* nombreArchivo, int* nVertices, int* vSalida, int* vLlegada);
-
+Resultados* recoridoProfundidad(Grafo* grafo, int verFinal, Pila* pilaActual, Pila* pilaRecorrido, int* verticesMarcados, Resultados* listaResultados);
+int flujoTotal(Resultados* listaRecorridos, Grafo* grafo);
+Pila* busquedaVerticeCritico(Grafo* grafo, int numeroVertices);
+void escribirDatos(Pila* criticos, Resultados* caminos, Grafo* grafo);
 
 
 /*------------------Funciones----------------------*/
@@ -277,7 +277,6 @@ Resultados* recoridoProfundidad(Grafo* grafo, int verFinal, Pila* pilaActual, Pi
 			while (puntAdyacentes != NULL)								//Agrego todos los vertices adyacentes a la pila
 			{
 				pilaActual = push_pila(pilaActual, puntAdyacentes->vertice);	//Agrego el vertice actual recorido
-				
 				pilaAux->vertice = pilaActual->vertice;							//Se copia en un auxiliar
 				pilaAux->siguiente = NULL;
 				
@@ -288,9 +287,9 @@ Resultados* recoridoProfundidad(Grafo* grafo, int verFinal, Pila* pilaActual, Pi
 			}
 
 			puntVertices = puntVertices->cabecera;					//Posiciono el puntero de vertices en el incio de la lista
-			
 		}
 	}
+
 	free(pilaAux);
 	return listaResultados;
 }
@@ -299,11 +298,10 @@ int flujoTotal(Resultados* listaRecorridos, Grafo* grafo) {
 	
 	Grafo* puntVertices = grafo;									//Puntero de la lista de vertices
 	Pila* camino = listaRecorridos->recorrido;
+	Nodos* punteroN = (Nodos*)malloc(sizeof(Nodos));		//Puntero para la lista de adyacente
 	int inicio;						//Vertice inicio
 	int llegada;					//Vertice llegada
 	int total = 0;		//Flujo total
-	
-	Nodos* punteroN = (Nodos*)malloc(sizeof(Nodos));		//Puntero para la lista de adyacente
 	
 	while (camino->siguiente != NULL)	//Hasta que mi camino siguiente sea nulo
 	{
@@ -323,9 +321,7 @@ int flujoTotal(Resultados* listaRecorridos, Grafo* grafo) {
 		}
 
 		if (total == 0) total = punteroN->peso;			//Si total no a sido iniciado
-
 		if (punteroN->peso < total) total = punteroN->peso;	//Si aparece un peso menor se cambia y conserva el menor
-	
 		camino = camino->siguiente;
 		puntVertices = puntVertices->cabecera;
 	}
@@ -360,7 +356,6 @@ Pila* busquedaVerticeCritico(Grafo* grafo, int numeroVertices)
 		while (pilaAux != NULL)										//Hasta que la pila este vacia
 		{
 			verAct = pilaAux->vertice;							//Vertice actual
-
 			pilaAux = pop(pilaAux);								//Se saca el ultimo verte
 
 			if (marcados[verAct - 1] == 0) {					//Si el vertice no a sido recorrido 
@@ -411,8 +406,8 @@ Pila* busquedaVerticeCritico(Grafo* grafo, int numeroVertices)
 	return criticos;
 }
 
-void escribirDatos(Pila* criticos, Resultados* caminos, Grafo* grafo) {
-	
+void escribirDatos(Pila* criticos, Resultados* caminos, Grafo* grafo) 
+{
 	Pila* auxCriticos = criticos;
 	Resultados* auxResultados = caminos;
 	Pila* caminoRes = (Pila*)malloc(sizeof(Pila));
@@ -439,7 +434,6 @@ void escribirDatos(Pila* criticos, Resultados* caminos, Grafo* grafo) {
 		}
 
 		axuliar = pop(axuliar);
-
 		total = flujoTotal(auxResultados, grafo);
 		suma = total + suma;
 		fprintf(archivo, ": %d\n", total);
@@ -448,17 +442,15 @@ void escribirDatos(Pila* criticos, Resultados* caminos, Grafo* grafo) {
 
 	fprintf(archivo, "Total: %d\n\n", suma);
 	fprintf(archivo, "Nodos Criticos\n");
-
 	fprintf(archivo, "%d", auxCriticos->vertice);
+	
 	while (auxCriticos->siguiente != NULL) {
 		auxCriticos = auxCriticos->siguiente;
 		fprintf(archivo, " - %d", auxCriticos->vertice);
 	}
-	
+
 	fclose(archivo);
 }
-
-
 
 void main()
 {
@@ -468,7 +460,6 @@ void main()
 	int verticeSalida = 0;
 	int verticeLlegada = 0;
 
-	
 	printf(" \n\nIngrese nombre del archivo:");
 	scanf("%s", nombreArchivoP);
 	
@@ -484,12 +475,10 @@ void main()
 	else
 		printf("Archivo leido con exito.\n");
 	
-
 	Pila* recorrido = NULL;										//Creo la lista que tendra el recorrido
 	Pila* pila = NULL;											//Creo una pila
 	Resultados* resultado = NULL;								//Creo la lista que guardara los recorridos
 	int* marcados = (int*)malloc(numeroVertices * sizeof(int));	//Creo un arreglo de igual tamaño que la cantidad de vertices
-	//Pila* pilaAux = (Pila*)malloc(sizeof(Pila));
 
 	for (int i = 0; i < numeroVertices; i++)					//Arreglo de "booleanos" para vertices recorridos
 	{
@@ -497,16 +486,12 @@ void main()
 	}
 
 	pila = push_pila(pila, verticeSalida);								//Agrego el vertice inicial
+	resultado = recoridoProfundidad(grafo, verticeLlegada, pila, recorrido, marcados, resultado); //Obtengo caminos posibles
 
-	resultado = recoridoProfundidad(grafo, verticeLlegada, pila, recorrido, marcados, resultado);
-
-	Pila* verticesCriticos = (Pila*)malloc(sizeof(Pila));
+	Pila* verticesCriticos = (Pila*)malloc(sizeof(Pila));		//Pila para guardar los nodos criticos
 	
 	verticesCriticos = busquedaVerticeCritico(grafo, numeroVertices);		//Busco los vertices criticos
-
-	escribirDatos(verticesCriticos, resultado, grafo);
-
-
+	escribirDatos(verticesCriticos, resultado, grafo);		//Escribir datos
 }
 
 
