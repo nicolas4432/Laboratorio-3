@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 
-
 /*------------------Estructuras----------------------*/
 typedef struct adyacente {
 	int peso;							//Peso de la arista
@@ -203,7 +202,7 @@ Grafo* leerGrafo(char* nombreArchivo, int* nVertices, int* vSalida, int* vLlegad
 	int	posCaracter = 0;							//Iterador para la posición del caracter
 	int aux = 0;									//Iterador auxiliar
 	Grafo* grafo = NULL;							//Estructura donde se guardara el grafo
-	FILE* datosGrafo = fopen("entrada.in", "r");	//Abrimos el archivo con un Puntero FILE*
+	FILE* datosGrafo = fopen(nombreArchivo, "r");	//Abrimos el archivo con un Puntero FILE*
 
 	grafo = (Grafo*)malloc(sizeof(Grafo));
 	grafo->cabecera = grafo;						//El nodo cabecera es el primero que se crea
@@ -493,51 +492,3 @@ void main()
 	verticesCriticos = busquedaVerticeCritico(grafo, numeroVertices);		//Busco los vertices criticos
 	escribirDatos(verticesCriticos, resultado, grafo);		//Escribir datos
 }
-
-
-
-//IMPRIMIR GRAFO
-//Grafo* puntero = grafo;					//Asigno puntero para posicion final
-//Nodos* punteroN = grafo->adyacente;
-//while (puntero != NULL)				//Posiciono puntero al final de la lista
-//{
-//	printf("El vertice es: %d\n", puntero->vertice);
-//	printf("Los vertices adyacentes son: ");
-//	while (punteroN != NULL)				//Posiciono puntero al final de la lista
-//	{
-//		printf("%d con peso %d. ", punteroN->vertice, punteroN->peso);
-//		punteroN = punteroN->siguiente;
-//	}
-//	printf("\n");
-//	puntero = puntero->sigVertice;
-//	if (puntero != NULL) punteroN = puntero->adyacente;
-//}
-
-
-//IMPRIMIR RESULTADOS
-//Resultados* puntero = resultado;					//Asigno puntero para posicion final
-//Pila* erecorrido = puntero->recorrido;
-//while (puntero != NULL)				//Posiciono puntero al final de la lista
-//{
-//	printf("El recorrido es: ");
-//	printf("%d ", erecorrido->vertice);
-//	erecorrido = erecorrido->siguiente;
-//	while (erecorrido != NULL)				//Posiciono puntero al final de la lista
-//	{
-//		printf("- %d ", erecorrido->vertice);
-//		erecorrido = erecorrido->siguiente;
-//	}
-//	printf("\n");
-//	puntero = puntero->siguiente;
-//	if (puntero != NULL) erecorrido = puntero->recorrido;
-//}
-
-
-//IMPRIMIR TODOS LOS VALORES TOTALES
-//while (resultado != NULL)
-//{
-	//int total = flujoTotal(resultado, grafo);
-	//printf("%d\n", total);
-	//resultado = resultado->siguiente;
-//
-//}
