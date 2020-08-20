@@ -276,13 +276,13 @@ Resultados* recoridoProfundidad(Grafo* grafo, int verFinal, Pila* pilaActual, Pi
 
 			while (puntAdyacentes != NULL)								//Agrego todos los vertices adyacentes a la pila
 			{
-				pilaActual = push_pila(pilaActual, puntAdyacentes->vertice);
+				pilaActual = push_pila(pilaActual, puntAdyacentes->vertice);	//Agrego el vertice actual recorido
 				
-				pilaAux->vertice = pilaActual->vertice;
+				pilaAux->vertice = pilaActual->vertice;							//Se copia en un auxiliar
 				pilaAux->siguiente = NULL;
 				
-				puntAdyacentes = puntAdyacentes->siguiente;
-				listaResultados = recoridoProfundidad(grafo, verFinal, pilaAux, pilaRecorrido, verticesMarcados, listaResultados);
+				puntAdyacentes = puntAdyacentes->siguiente;						//Se pasa al siguiente adyacente
+				listaResultados = recoridoProfundidad(grafo, verFinal, pilaAux, pilaRecorrido, verticesMarcados, listaResultados); //Se buscan los resultados con el recorrido actual
 				pilaAux = (Pila*)malloc(sizeof(Pila));
 				pilaActual = pop(pilaActual);
 			}
@@ -295,7 +295,103 @@ Resultados* recoridoProfundidad(Grafo* grafo, int verFinal, Pila* pilaActual, Pi
 	return listaResultados;
 }
 
+int flujoTotal(Resultados* listaRecorridos, Grafo* grafo) {
+	
+	Grafo* puntVertices = grafo;									//Puntero de la lista de vertices
+	Pila* camino = listaRecorridos->recorrido;
+	int verAct;													//Vertice actual
+	int inicio;						//Vertice inicio
+	int llegada;					//Vertice llegada
+	int total = 0;		//Flujo total
+	
+	Nodos* punteroN = (Nodos*)malloc(sizeof(Nodos));		//Puntero para la lista de adyacente
+	
+	while (camino->siguiente != NULL)	//Hasta que mi camino siguiente sea nulo
+	{
+		llegada = camino->vertice;					//Vertice de llegada
+		inicio = camino->siguiente->vertice;		//Vertice de salida
 
+		for (int i = 1; i < inicio; i++)						//Posiciono el puntero en el vertice inicio para conocer el flujo al vertice de llegada
+		{
+			puntVertices = puntVertices->sigVertice;
+		}
+
+		punteroN = puntVertices->adyacente;						//Apunto la lista de adyacentes
+
+		while (punteroN->vertice != llegada)					//Busco el vertice adyacente de llegada y su peso
+		{
+			punteroN = punteroN->siguiente;
+		}
+
+		if (total == 0) total = punteroN->peso;			//Si total no a sido iniciado
+
+		if (punteroN->peso < total) total = punteroN->peso;	//Si aparece un peso menor se cambia y conserva el menor
+	
+		camino = camino->siguiente;
+		puntVertices = puntVertices->cabecera;
+	}
+
+	return total;
+}
+
+Pila* busquedaVerticeCritico(Grafo* grafo, int numeroVertices)
+{
+	Grafo* puntVertices = grafo;								//Puntero al grafo
+	Nodos* puntAdyacentes = (Nodos*)malloc(sizeof(Nodos));
+	Pila* recorrido = NULL;										//Creo la lista que tendra el recorrido
+	Pila* pila = NULL;											//Creo una pila
+	Pila* criticos = NULL;									//Lista para nodos criticos
+	int* marcados = (int*)malloc(numeroVertices * sizeof(int));	//Creo un arreglo de igual tamaño que la cantidad de vertices
+	int verAct;		//Vertice actual
+
+	for (int i = 0; i < numeroVertices; i++)
+	{
+		for (int j = 0; j < numeroVertices; j++)					//Arreglo de "booleanos" para vertices recorridos
+		{
+			marcados[j] = 0;
+		}
+		
+		marcados[i] = 1;									//Marco el vertice a verificar si es critico
+		if (i == numeroVertices - 1) verAct = 1;					//Si estoy en el ultimo vertice mi vertice actual es 1
+		else verAct = i + 2;					//Vertice actual es el siguiente al vertice marcado como critico
+
+
+		for (int l = 0; l < numeroVertices - 1; l++)
+		{
+			if (verAct == numeroVertices + 1) verAct = 1;			//Recorro desde el primer vertice si sobrepase el ultmivo vertice
+
+			for (int k = 1; k < verAct; k++)						//Posiciono el puntero en el vertice actual
+			{
+				puntVertices = puntVertices->sigVertice;
+			}
+
+			puntAdyacentes = puntVertices->adyacente;				//Lista de adyacentes del vertice actual
+
+			while (puntAdyacentes != NULL)								//Agrego todos los vertices adyacentes a la pila
+			{
+				if (marcados[puntAdyacentes->vertice - 1] == 0) {					//Si el vertice no a sido recorrido 
+					marcados[puntAdyacentes->vertice - 1] = 1;
+				}
+				puntAdyacentes = puntAdyacentes->siguiente;
+			}
+
+			verAct++;
+			puntVertices = puntVertices->cabecera;
+		}
+
+
+		for (int k = 0; k < numeroVertices; k++)					//Reviso si algun vertice no fue recorrido
+		{
+			if (marcados[k] == 0)							//Si un vertice no fue recorrido es por que el nodo marcado al incio es nodo critico
+			{
+				if (i == 4) criticos = push_pila(criticos, 1);
+				else criticos = push_pila(criticos, i + 1);
+			}
+		}
+
+	}
+	return criticos;
+}
 
 
 void main()
@@ -338,7 +434,11 @@ void main()
 
 	resultado = recoridoProfundidad(grafo, verticeLlegada, pila, recorrido, marcados, resultado);
 	
+	Pila* verticesCriticos = (Pila*)malloc(sizeof(Pila));
+	verticesCriticos = busquedaVerticeCritico(grafo, numeroVertices);
 
+
+	printf("%d\n", verticesCriticos->vertice);
 
 
 
@@ -380,4 +480,14 @@ void main()
 //	printf("\n");
 //	puntero = puntero->siguiente;
 //	if (puntero != NULL) erecorrido = puntero->recorrido;
+//}
+
+
+//IMPRIMIR TODOS LOS VALORES TOTALES
+//while (resultado != NULL)
+//{
+//	int total = flujoTotal(resultado, grafo);
+//	printf("%d\n", total);
+//	resultado = resultado->siguiente;
+//
 //}
